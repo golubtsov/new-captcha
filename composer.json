@@ -1,0 +1,17 @@
+{
+  "name": "nigo/captcha-img",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Nigo\\CaptchaImg\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Nikita"
+    }
+  ],
+  "require": {
+    "php": ">=8.3"
+  }
+}
