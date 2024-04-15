@@ -6,19 +6,32 @@ use GdImage;
 
 class Captcha
 {
-    private int $width;
+    protected int $countCircles;
 
-    private int $height;
+    protected int $maxCountCircles;
 
-    private GdImage $img;
+    protected array $circlesRadius = [];
 
-    private false|int $bg;
+    protected int $width;
 
-    public function __construct(int $width = 200, int $height = 150, bool $alfa = false)
+    protected int $height;
+
+    protected GdImage $img;
+
+    protected false|int $bg;
+
+    public function __construct(
+        int  $width = 200,
+        int  $height = 150,
+        bool $alfa = true,
+        int  $maxCountCircles = 8
+    )
     {
         $this->width = $width;
         $this->height = $height;
         $this->img = imagecreatetruecolor($this->width, $this->height);
+        $this->maxCountCircles = $maxCountCircles;
+        $this->countCircles = rand(1, $this->maxCountCircles);
         imagesavealpha($this->img, $alfa);
     }
 
@@ -29,13 +42,54 @@ class Captcha
         return $this;
     }
 
-    public function save(string $path, string $type = 'png'): void
+    protected function createBgColor(): array
     {
-        $col_ellipse = imagecolorallocatealpha($this->img, 255, 255, 0, 80);
-        imagefilledellipse($this->img, 50, 50, 50, 50, $col_ellipse);
+        do {
+            $red = rand(50, 255);
+            $green = rand(50, 255);
+            $blue = rand(50, 255);
+        } while ($red == $blue && $red == $green);
 
-        $col_ellipse2 = imagecolorallocatealpha($this->img, 255, 5, 200, 80);
-        imagefilledellipse($this->img, 50, 20, 70, 50, $col_ellipse2);
+        return [$red, $green, $blue];
+    }
+
+    protected function createCircles(): static
+    {
+        for ($i = 0; $i < $this->countCircles; $i++) {
+
+            do {
+                $radius = rand(10, 100);
+                $cx = rand(10, $this->width - 20);
+                $cy = rand(10, $this->height - 20);
+            } while (
+                $this->checkDiameterInArray($radius) ||
+                $cx + $radius > $this->width ||
+                $cx - $radius < 0 ||
+                $cy + $radius > $this->height ||
+                $cy - $radius < 0
+            );
+
+            $this->circlesRadius[] = $radius;
+
+            $colors = $this->createBgColor();
+
+            $bgEllipse = imagecolorallocatealpha($this->img, $colors[0], $colors[1], $colors[2], 20);
+
+            imagefilledellipse($this->img, $cx, $cy, $radius, $radius, $bgEllipse);
+        }
+
+        return $this;
+    }
+
+    protected function checkDiameterInArray(int $radius): bool
+    {
+        return in_array($radius, $this->circlesRadius);
+    }
+
+    /** Return count circles on image */
+    public function save(string $path, string $type = 'png'): int
+    {
+        $this->createCircles();
 
         match ($type) {
             'png' => imagepng($this->img, $path),
@@ -43,5 +97,7 @@ class Captcha
         };
 
         imagedestroy($this->img);
+
+        return $this->countCircles;
     }
 }
