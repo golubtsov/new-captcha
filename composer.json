@@ -1,6 +1,7 @@
 {
   "name": "nigo/captcha-img",
   "type": "library",
+  "license": "MIT",
   "autoload": {
     "psr-4": {
       "Nigo\\CaptchaImg\\": "src/"
@@ -8,7 +9,8 @@
   },
   "authors": [
     {
-      "name": "Nikita"
+      "name": "Nikita Golubtsov",
+      "url": "https://github.com/golubtsov/new-captcha"
     }
   ],
   "require": {
